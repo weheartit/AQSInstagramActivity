@@ -52,8 +52,8 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 
 - (void)performActivity {
     NSString *text = [self firstStringOrEmptyStringFromArray:_activityItems];
-    UIImage *image = [self nilOrFirstImageFromArray:_activityItems];
-    NSURL *URL = [self nilOrFileURLWithImageDataTemporary:UIImageJPEGRepresentation(image, 0.9)];
+    NSData *imageData = [self nilOrImageDataFromItems:[self activityItems]];
+    NSURL *URL = [self nilOrFileURLWithImageDataTemporary:imageData];
     self.controller = [self documentInteractionControllerForInstagramWithFileURL:URL withCaptionText:text];
     
     UIView *currentView = [self currentView];
@@ -67,6 +67,23 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 }
 
 # pragma mark - Helpers (UIDocumentInteractionController)
+
+- (NSData *)nilOrImageDataFromItems:(NSArray *)activityItems
+{
+    UIImage *image = [self nilOrFirstImageFromArray:_activityItems];
+    if (image) {
+        return UIImageJPEGRepresentation(image, 0.9);
+    }
+    
+    __block NSData *fileData = nil;
+    [activityItems enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+        if ([obj isKindOfClass:[NSURL class]] && [obj isFileURL]) {
+            fileData = [NSData dataWithContentsOfURL:obj];
+        }
+    }];
+    
+    return fileData;
+}
 
 - (NSURL *)nilOrFileURLWithImageDataTemporary:(NSData *)data {
     NSString *writePath = [NSTemporaryDirectory() stringByAppendingPathComponent:@"instagram.igo"];
