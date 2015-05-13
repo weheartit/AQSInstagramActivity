@@ -22,7 +22,7 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 
 - (void)prepareWithActivityItems:(NSArray *)activityItems {
     [super prepareWithActivityItems:activityItems];
-    
+
     self.activityItems = activityItems;
 }
 
@@ -55,9 +55,15 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
     NSData *imageData = [self nilOrImageDataFromItems:[self activityItems]];
     NSURL *URL = [self nilOrFileURLWithImageDataTemporary:imageData];
     self.controller = [self documentInteractionControllerForInstagramWithFileURL:URL withCaptionText:text];
-    
+
+    if(!self.controller) {
+        return;
+    }
+
     UIView *currentView = [self currentView];
-    [self.controller presentOpenInMenuFromRect:CGRectMake(0, 0, currentView.bounds.size.width, currentView.bounds.size.width) inView:currentView animated:YES];
+    [self.rootViewController dismissViewControllerAnimated:NO completion:^{
+        [self.controller presentOpenInMenuFromRect:CGRectMake(0, 0, currentView.bounds.size.width, currentView.bounds.size.width) inView:currentView animated:YES];
+    }];
 }
 
 # pragma mark - Helpers (Instagram)
@@ -74,14 +80,14 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
     if (image) {
         return UIImageJPEGRepresentation(image, 0.9);
     }
-    
+
     __block NSData *fileData = nil;
     [activityItems enumerateObjectsUsingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
         if ([obj isKindOfClass:[NSURL class]] && [obj isFileURL]) {
             fileData = [NSData dataWithContentsOfURL:obj];
         }
     }];
-    
+
     return fileData;
 }
 
@@ -91,11 +97,15 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
         [self activityDidFinish:NO];
         return nil;
     }
-    
+
     return [NSURL fileURLWithPath:writePath];
 }
 
 - (UIDocumentInteractionController *)documentInteractionControllerForInstagramWithFileURL:(NSURL *)URL withCaptionText:(NSString *)textOrNil {
+    // UIDocumentInteractionController _requires_ a file URL.
+    if(!URL || !URL.isFileURL){
+        return nil;
+    }
     UIDocumentInteractionController *controller = [UIDocumentInteractionController interactionControllerWithURL:URL];
     [controller setUTI:@"com.instagram.exclusivegram"];
     if (textOrNil == nil) {
@@ -111,8 +121,12 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
 # pragma mark - Helpers (View)
 
 - (UIView *)currentView {
+    return self.rootViewController.view;
+}
+
+- (UIViewController *)rootViewController {
     UIWindow *window = [[UIApplication sharedApplication] keyWindow];
-    return window.rootViewController.view;
+    return window.rootViewController;
 }
 
 # pragma mark - Helpers (UIActivity)
