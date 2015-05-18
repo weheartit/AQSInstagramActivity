@@ -1,4 +1,6 @@
-AQSInstagramActivity
+ * This is a forked version.
+
+AQSInstagramActivity 
 ====================
 
 ![](http://img.shields.io/cocoapods/v/AQSInstagramActivity.svg?style=flat) [![Build Status](https://travis-ci.org/AquaSupport/AQSInstagramActivity.svg)](https://travis-ci.org/AquaSupport/AQSInstagramActivity)
