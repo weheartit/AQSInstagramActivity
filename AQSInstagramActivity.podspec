@@ -1,6 +1,6 @@
 Pod::Spec.new do |s|
   s.name         = "AQSInstagramActivity"
-  s.version      = "0.1.0"
+  s.version      = "0.1.1"
   s.summary      = "[iOS] UIActivity Class for Instagram"
   s.homepage     = "https://github.com/AquaSupport/AQSInstagramActivity"
   s.license      = "MIT"
