@@ -61,9 +61,15 @@ NSString *const kAQSInstagramURLScheme = @"instagram://app";
     }
 
     UIView *currentView = [self currentView];
-    [self.rootViewController dismissViewControllerAnimated:NO completion:^{
+    void (^presentationBlock)() = ^{
         [self.controller presentOpenInMenuFromRect:CGRectMake(0, 0, currentView.bounds.size.width, currentView.bounds.size.width) inView:currentView animated:YES];
-    }];
+    };
+    
+    if ([[self rootViewController] presentedViewController]) {
+        [self.rootViewController dismissViewControllerAnimated:NO completion:presentationBlock];
+    } else {
+        presentationBlock();
+    }
 }
 
 # pragma mark - Helpers (Instagram)
